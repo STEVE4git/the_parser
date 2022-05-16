@@ -112,7 +112,7 @@ int file_stream(StreamReader read, int log_number)
         {
             
             Console.WriteLine(e.Message);
-            File.WriteAllLinesAsync($"log_{log_number}.txt", append_deez);
+            File.WriteAllLines($"log_{log_number}.txt", append_deez);
             System.Environment.Exit(0);
             
 
@@ -138,7 +138,9 @@ string parser_function(string parse)
     ImmutableArray<string> start_times = ImmutableArray.Create(new string[] { "round_start", "round_setup_begin", "round_setup_end", "round_win", "round_length", " current score ", "round_overtime" });
     ImmutableArray<string> read_values = ImmutableArray.Create(new string[] {"damage", "weapon", "healing"});
     ImmutableArray<string> action_word = ImmutableArray.Create(new string[] { "with" });
+
     string dictionaryString = null;
+
     ImmutableArray<ImmutableArray<string>> const_arrays = ImmutableArray.Create(new ImmutableArray<string>[] { const_values, merc_values, result_of_action, team_talk,against,start_times, read_values, action_word });
     List<int> player_number = new List<int>();
     int new_x = 0;
@@ -160,12 +162,12 @@ string parser_function(string parse)
 
                
                 int check = parse.IndexOf(@"""", new_index, length_of_search-new_index);
-                Console.WriteLine("\n\n\n\n CHECK:" + check);
-                Console.WriteLine("NEW_INDEX"+new_index);
-                Console.WriteLine("\n\n\nEND STRING" + loop_string);
-                Console.WriteLine(new_x);
+
+
                 int good_check = parse.IndexOf(loop_string, new_index, length_of_search-new_index);
+
                 int new_check = check - new_index;
+
                 if (new_index < end_this && check != -1 && (check-8) < good_check )
                 {
                     int team_index = const_teams.IndexOf(loop_string);
