@@ -113,14 +113,11 @@ int file_stream(StreamReader read, int log_number)
             
             Console.WriteLine(e.Message);
             File.WriteAllLines($"log_{log_number}.txt", append_deez);
-            System.Environment.Exit(0);
+            return 0;
             
 
         }
     }
-    Console.WriteLine(append_deez);
-
-    File.WriteAllLinesAsync($"log_{log_number}.txt", append_deez);
 
     return 1;
 
@@ -142,8 +139,11 @@ string parser_function(string parse)
     string dictionaryString = null;
 
     ImmutableArray<ImmutableArray<string>> const_arrays = ImmutableArray.Create(new ImmutableArray<string>[] { const_values, merc_values, result_of_action, team_talk,against,start_times, read_values, action_word });
+   
     List<int> player_number = new List<int>();
+
     int new_x = 0;
+
     Dictionary<int, int> people_involved = new Dictionary<int, int>();
     while (new_x < 50)
     {
@@ -153,10 +153,9 @@ string parser_function(string parse)
             int length_of_search = parse.Length;
 
             int new_index = parse.IndexOf(interp_string, 0, length_of_search);
-            Console.WriteLine("\n\n\n\n NEW_INDEX:" + new_index);
-            string test_string = @"""";
+           
             int end_this = parse.IndexOf(@"""", new_index, length_of_search - new_index);
-            Console.WriteLine("\n\n\n\n ENDDDDD:" + end_this);
+      
             foreach (string loop_string in const_teams)
             {
 
@@ -193,7 +192,7 @@ string parser_function(string parse)
     
     if (people_involved.Count > 0)
     {
-        string new_string = people_involved.ElementAt(0).Key + " : " + people_involved.ElementAt(0).Value + ", ";
+        string new_string = $"{people_involved.ElementAt(0).Key}:{people_involved.ElementAt(0).Value},";
         dictionaryString = dictionaryString + new_string;
     }
 
@@ -262,17 +261,27 @@ string parser_function(string parse)
                          
                     case 6:
                         int search_terms_2 = parse.IndexOf(search_this,0,search_to);
-                        int test_this_2 = parse.IndexOf(")", search_terms_2, search_to-search_terms_2);
-                        if (test_this_2 == -1)
+                        int no_quotes = parse.IndexOf(@"""", search_terms_2, search_to - search_terms_2);
+
+                        int test_this_2 = parse.IndexOf(@")", search_terms_2, search_to-search_terms_2);
+
+                        int search_this_length = search_this.Length;
+                        int there_should_be_a_QUOTE = parse.IndexOf(@"""", search_terms_2, search_to-search_terms_2);
+                        int comparison_this = there_should_be_a_QUOTE - search_this_length;
+
+
+                        if (test_this_2 == -1 || no_quotes == search_terms_2+1 || comparison_this!=search_terms_2+1)
                         {
                             break;
                         }
                         else
                         {   int length = test_this_2 - search_terms_2;
+
                             string sub_string_2 = parse.Substring(search_terms_2, length);
                             
                             
-                            string new_append_6 = $"    {search_this}   {sub_string_2}";
+                            string new_append_6 = $"   {sub_string_2}   ";
+
                             dictionaryString += new_append_6;
                         }
                         break;
