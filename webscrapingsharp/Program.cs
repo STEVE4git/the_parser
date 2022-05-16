@@ -3,50 +3,63 @@ using System.IO.Compression;
 using System.Net;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 
+await real_main();
 
-temporary_main();
+
 async Task real_main()
 {
-    int processor_count = Environment.ProcessorCount;
-    List<Thread> thread_wrangler = new List<Thread>();
-    for (int i=0; i<=processor_count; i++)
-    {
-        Thread myThread = new Thread(async () => await web_scraper());
-        myThread.Start();
-        thread_wrangler.Add(myThread); 
-
-    }
-    foreach (Thread thread in thread_wrangler)
-    {
-        thread.Join();
-    }
-    
-
-}
-async Task web_scraper()
-{
-    
     int log_number;
+    string system_envrioment = Directory.GetCurrentDirectory();
+    string new_directory = $"{system_envrioment}\\temporary";
+    HttpClient client = new HttpClient();
+
+    if (!Directory.Exists(new_directory))
+    {
+        Directory.CreateDirectory(new_directory);
+    }
+
     try
     {
-       FileStream read_file = File.Open("last_log.txt", FileMode.Open);
+        FileStream read_file = File.Open("last_log.txt", FileMode.Open);
         var byte_arr = new byte[100];
         int read_results = read_file.Read(byte_arr);
         log_number = BitConverter.ToInt32(byte_arr, 0);
     }
-    catch
+    catch (Exception ex)
     {
-        
+        Console.WriteLine(ex.ToString());
         log_number = Constants.file_start;
         await File.WriteAllTextAsync("last_log.txt", log_number.ToString());
 
+    }
 
+    int processor_count = Environment.ProcessorCount;
+    List<Task> thread_wrangler = new List<Task>();
+
+    for (int i=0; i<processor_count; i++)
+    {
+
+        Task new_task = Task.Run(() => web_scraper(log_number, client));
+        log_number++;
+        thread_wrangler.Add(new_task);
 
     }
-    HttpClient client = new HttpClient();
+
+    Task.WaitAll(thread_wrangler.ToArray());
+
+    
+
+   
+}
+async Task web_scraper(int log_number, HttpClient client)
+{
+    
+   
+    
     
 
     while (log_number < Constants.file_end)
@@ -58,35 +71,32 @@ async Task web_scraper()
             string interop_string = $"{Constants.website}{log_number}{Constants.website_end}";
             HttpResponseMessage response = await client.GetAsync(interop_string);
             response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
-            string create_file = $"{log_number}" + ".txt";
-            await File.WriteAllTextAsync(create_file, responseBody);
-            StreamReader fs = File.OpenText(create_file);
+            Console.WriteLine(response.StatusCode);
+            string system_envrioment = Directory.GetCurrentDirectory();
+            System.Net.Http.HttpContent content = response.Content;
+            var contentStream = await content.ReadAsStreamAsync();
+
+            string create_file = $"{log_number}.zip";
+            var stream_read = File.Create(create_file);
+            await contentStream.CopyToAsync(stream_read);
+            string file_path = $"{system_envrioment}\\{create_file}";
+            string extract_to = $"{system_envrioment}\\temporary";
+            ZipFile.ExtractToDirectory(file_path, extract_to);
+            string open_text = $"{extract_to}log_{log_number}.log";
+            string good_rename = $"{extract_to}log_{log_number}.txt";
+
+            File.Move(open_text,good_rename);
+            StreamReader fs = File.OpenText(good_rename);
             file_stream(fs, log_number);
-            Console.WriteLine(responseBody);
-            await File.WriteAllTextAsync("last_log.txt", log_number.ToString());
 
         }
         catch (HttpRequestException e)
         {
             Console.WriteLine("\nException Caught!");
             Console.WriteLine("Message :{0} ", e.Message);
-            System.Environment.Exit(0);
+            return;
         }
     }
-}
-
-int temporary_main()
-{
-    int processor_count = Environment.ProcessorCount;
-    Console.WriteLine(processor_count);
-    string path = Directory.GetCurrentDirectory();
-    Console.WriteLine(path);
-    string open_this = Console.ReadLine();
-    StreamReader read_this = new StreamReader(open_this, true);
-    int is_good = file_stream(read_this, 1);
-
-    return 1;
 }
 
 int file_stream(StreamReader read, int log_number)
@@ -101,9 +111,6 @@ int file_stream(StreamReader read, int log_number)
             string parse_this = read.ReadLine();
             parse_this = parse_this.ToLower();
             string append = parser_function(parse_this);
-            Console.WriteLine(append);
-            Console.WriteLine("\n\n\n");
-            Console.WriteLine("Line#:"+line_number);
             append_deez.Add(append);
             line_number++;
 
@@ -335,7 +342,6 @@ struct Player
 
 
 }
-
 
 static class Constants
 {
