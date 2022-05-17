@@ -24,10 +24,8 @@ async Task real_main()
 
     try
     {
-        FileStream read_file = File.Open("last_log.txt", FileMode.Open);
-        var byte_arr = new byte[100];
-        int read_results = read_file.Read(byte_arr);
-        log_number = BitConverter.ToInt32(byte_arr, 0);
+        string read_file = File.ReadAllText("last_log.txt");
+        log_number = Int32.Parse(read_file);
     }
     catch (Exception ex)
     {
@@ -57,21 +55,13 @@ async Task real_main()
 }
 async Task web_scraper(int log_number, HttpClient client)
 {
-    
-   
-    
-    
-
-    while (log_number < Constants.file_end)
-    {
-        log_number++;
-
         try
         {
             string interop_string = $"{Constants.website}{log_number}{Constants.website_end}";
+            Console.WriteLine(interop_string);
             HttpResponseMessage response = await client.GetAsync(interop_string);
-            response.EnsureSuccessStatusCode();
-            Console.WriteLine(response.StatusCode);
+            var msg = response.EnsureSuccessStatusCode();
+            Console.WriteLine(msg);
             string system_envrioment = Directory.GetCurrentDirectory();
             System.Net.Http.HttpContent content = response.Content;
             var contentStream = await content.ReadAsStreamAsync();
@@ -80,12 +70,15 @@ async Task web_scraper(int log_number, HttpClient client)
             var stream_read = File.Create(create_file);
             await contentStream.CopyToAsync(stream_read);
             string file_path = $"{system_envrioment}\\{create_file}";
+            Console.WriteLine(file_path);
             string extract_to = $"{system_envrioment}\\temporary";
+            Console.WriteLine(extract_to);
             ZipFile.ExtractToDirectory(file_path, extract_to);
-            string open_text = $"{extract_to}log_{log_number}.log";
-            string good_rename = $"{extract_to}log_{log_number}.txt";
+            string open_text = $"{extract_to}\\log_{log_number}.log";
+            string good_rename = $"{extract_to}\\log_{log_number}.txt";
 
             File.Move(open_text,good_rename);
+            Console.WriteLine(good_rename);
             StreamReader fs = File.OpenText(good_rename);
             file_stream(fs, log_number);
 
@@ -96,7 +89,7 @@ async Task web_scraper(int log_number, HttpClient client)
             Console.WriteLine("Message :{0} ", e.Message);
             return;
         }
-    }
+    
 }
 
 int file_stream(StreamReader read, int log_number)
