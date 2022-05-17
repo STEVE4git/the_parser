@@ -34,7 +34,7 @@ void real_thread()
         Console.WriteLine(ex.ToString());
         log_number = Constants.file_start;
         File.WriteAllText("last_log.txt", log_number.ToString());
-        Directory.Delete(data_directory, true);
+        Directory.Delete(new_directory, true);
 
     }
     int return_result = real_threaded(log_number);
