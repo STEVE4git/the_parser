@@ -34,11 +34,11 @@ void real_thread()
         Console.WriteLine(ex.ToString());
         log_number = Constants.file_start;
         File.WriteAllText("last_log.txt", log_number.ToString());
-        
+
 
     }
-   int return_result = real_threaded(log_number);
-   File.WriteAllText("last_log.txt", return_result.ToString());
+    int return_result = real_threaded(log_number);
+    File.WriteAllText("last_log.txt", return_result.ToString());
 
 
 
@@ -53,17 +53,17 @@ int real_threaded(int log_number)
 {
 
 
-    int multiplier = 90;
+   
 
     List<Task> thread_wrangler = new List<Task>();
     List<int> new_int = new List<int>();
     HttpClient client = new HttpClient();
 
 
-    for (int i=0; i<90; i++)
+    for (int i = 0; i < 1000; i++)
     {
-        new_int.Add(log_number+i);
-        
+        new_int.Add(log_number + i);
+
     }
     foreach (int i in new_int)
     {
@@ -72,49 +72,49 @@ int real_threaded(int log_number)
 
     }
     Task.WaitAll(thread_wrangler.ToArray());
-    return log_number+90;
+    return log_number + 1000;
 
 
-    
-   
+
+
 }
 async Task web_scraper(int log_number, HttpClient client)
 {
-        try
-        {
-            string interop_string = $"{Constants.website}{log_number}{Constants.website_end}";
-           
-            HttpResponseMessage response = await client.GetAsync(interop_string);
-           
-          
-            string system_environment = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            System.Net.Http.HttpContent content = response.Content;
-            var contentStream = await content.ReadAsStreamAsync();
+    try
+    {
+        string interop_string = $"{Constants.website}{log_number}{Constants.website_end}";
 
-            string create_file = $"{log_number}_delete.zip";
-            var stream_read = File.Create($"{system_environment}\\{create_file}");
-     
-            await contentStream.CopyToAsync(stream_read);
-            contentStream.Close();
-            stream_read.Close();
-            file_stream(system_environment, log_number, create_file);
+        HttpResponseMessage response = await client.GetAsync(interop_string);
+
+
+        string system_environment = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        System.Net.Http.HttpContent content = response.Content;
+        var contentStream = await content.ReadAsStreamAsync();
+
+        string create_file = $"{log_number}_delete.zip";
+        var stream_read = File.Create($"{system_environment}\\{create_file}");
+
+        await contentStream.CopyToAsync(stream_read);
+        contentStream.Close();
+        stream_read.Close();
+        file_stream(system_environment, log_number, create_file);
 
     }
-        catch (Exception e)
-        {
-            Console.WriteLine("\nException Caught!");
-            Console.WriteLine("Message :{0} ", e.Message);
-            
-        }
+    catch (Exception e)
+    {
+        Console.WriteLine("\nException Caught!");
+        Console.WriteLine("Message :{0} ", e.Message);
 
-    
+    }
+
+
 }
 
 int file_stream(string system_environment, int log_number, string create_file)
 {
     string current_directory = Directory.GetCurrentDirectory();
     string extract_to = $"{current_directory}\\temporary\\{log_number}";
-    
+
     string file_path = $"{system_environment}\\{create_file}";
     string good_rename = $"{extract_to}\\log_{log_number}.txt";
     if (!Directory.Exists(extract_to))
@@ -126,7 +126,10 @@ int file_stream(string system_environment, int log_number, string create_file)
         File.Delete(open_text);
         File.Delete(file_path);
     }
-    
+    else
+    {
+        File.Delete(file_path);
+    }
     StreamReader fs = File.OpenText(good_rename);
     List<string> append_deez = new List<string>();
     int line_number = 0;
@@ -152,7 +155,7 @@ int file_stream(string system_environment, int log_number, string create_file)
             }
             File.WriteAllLines($"{data_path}\\{log_number}.txt", append_deez);
             return 0;
-            
+
 
         }
     }
@@ -171,19 +174,19 @@ string parser_function(string parse)
     ImmutableArray<string> const_teams = ImmutableArray.Create(new string[] { "<red>", "<blue>" });
 
 
-    ImmutableArray<string> const_values = ImmutableArray.Create(new string[] { "triggered", "killed", "picked up item", "commited suicide with" , "changed role to", "spawned as" });
+    ImmutableArray<string> const_values = ImmutableArray.Create(new string[] { "triggered", "killed", "picked up item", "commited suicide with", "changed role to", "spawned as" });
     ImmutableArray<string> merc_values = ImmutableArray.Create(new string[] { "scout", "soldier", "pyro", "demo", "heavyweapons", "engineer", "medic", "sniper", "spy" });
     ImmutableArray<string> result_of_action = ImmutableArray.Create(new string[] { @"""damage""", @"""healed""", @"""medkit_small""", @"""medkit_medium""", @"""medkit_large""", @"""player_builtobject""", @"""killedobject""", @"""chargedeployed""", @"""pointcaptured""", @"""player_carryobject""", @"""player_dropobject""", @"""shot_fired""", @"""medic_death""" });
     ImmutableArray<string> team_talk = ImmutableArray.Create(new string[] { "say_team" });
-    ImmutableArray<string> against  = ImmutableArray.Create(new string[] { "against" });
+    ImmutableArray<string> against = ImmutableArray.Create(new string[] { "against" });
     ImmutableArray<string> start_times = ImmutableArray.Create(new string[] { "round_start", "round_setup_begin", "round_setup_end", "round_win", "round_length", " current score ", "round_overtime" });
-    ImmutableArray<string> read_values = ImmutableArray.Create(new string[] {"damage", "weapon", "healing"});
+    ImmutableArray<string> read_values = ImmutableArray.Create(new string[] { "damage", "weapon", "healing", "winner", "round" });
     ImmutableArray<string> action_word = ImmutableArray.Create(new string[] { "with" });
 
     string dictionaryString = null;
 
-    ImmutableArray<ImmutableArray<string>> const_arrays = ImmutableArray.Create(new ImmutableArray<string>[] { const_values, merc_values, result_of_action, team_talk,against,start_times, read_values, action_word });
-   
+    ImmutableArray<ImmutableArray<string>> const_arrays = ImmutableArray.Create(new ImmutableArray<string>[] { const_values, merc_values, result_of_action, team_talk, against, start_times, read_values, action_word });
+
     List<int> player_number = new List<int>();
 
     int new_x = 0;
@@ -197,21 +200,21 @@ string parser_function(string parse)
             int length_of_search = parse.Length;
 
             int new_index = parse.IndexOf(interp_string, 0, length_of_search);
-           
+
             int end_this = parse.IndexOf(@"""", new_index, length_of_search - new_index);
-      
+
             foreach (string loop_string in const_teams)
             {
 
-               
-                int check = parse.IndexOf(@"""", new_index, length_of_search-new_index);
+
+                int check = parse.IndexOf(@"""", new_index, length_of_search - new_index);
 
 
-                int good_check = parse.IndexOf(loop_string, new_index, length_of_search-new_index);
+                int good_check = parse.IndexOf(loop_string, new_index, length_of_search - new_index);
 
                 int new_check = check - new_index;
 
-                if (new_index < end_this && check != -1 && (check-8) < good_check )
+                if (new_index < end_this && check != -1 && (check - 8) < good_check)
                 {
                     int team_index = const_teams.IndexOf(loop_string);
                     people_involved.Add(new_x, team_index);
@@ -233,7 +236,7 @@ string parser_function(string parse)
 
 
     }
-    
+
     if (people_involved.Count > 0)
     {
         string new_string = $"{people_involved.ElementAt(0).Key}:{people_involved.ElementAt(0).Value},";
@@ -241,9 +244,9 @@ string parser_function(string parse)
     }
 
     int length_of_arr = const_arrays.Length;
-    for(int x=0; x<length_of_arr; x++)
+    for (int x = 0; x < length_of_arr; x++)
     {
-        foreach(string search_this in const_arrays[x])
+        foreach (string search_this in const_arrays[x])
         {
             bool test = parse.Contains(search_this); // Handling actions
             int search_to = parse.Length;
@@ -254,12 +257,12 @@ string parser_function(string parse)
                 switch (x)
                 {
                     case 0:
-                       final_append = new_good_index + Constants.action_values;
+                        final_append = new_good_index + Constants.action_values;
                         string new_append = $"       {final_append}    ";
                         dictionaryString += new_append;
                         break;
-                    case 1:   
-                        final_append = new_good_index+Constants.merc_values;
+                    case 1:
+                        final_append = new_good_index + Constants.merc_values;
                         string new_append_2 = $"       {final_append}   ";
                         dictionaryString += new_append_2;
                         break;
@@ -280,47 +283,52 @@ string parser_function(string parse)
                         break;
                     case 4:
 
-                        final_append = new_good_index-1;
+                        final_append = new_good_index - 1;
                         string who_did_it = $"{people_involved.ElementAt(1).Key}:{people_involved.ElementAt(1).Value},";
                         string new_append_5 = $"       {final_append}           {who_did_it} ";
                         dictionaryString += new_append_5;
                         break;
                     case 5:
-                        int search_terms = parse.IndexOf(search_this,0, search_to);
-                        int test_this = parse.IndexOf("(", search_terms, search_to - search_terms);
-                        if(test_this == -1)
+                        int search_terms = parse.IndexOf(search_this, 0, search_to);
+                        int test_this = parse.IndexOf(@"""", search_terms, search_to - search_terms);
+                        int test_this_3 = parse.IndexOf(@"""", 0, search_to);
+                        int length_2 = search_this.Length+search_terms;
+
+                        
+                        if (test_this_3!=search_terms-1 || test_this!=length_2 )
                         {
                             break;
                         }
                         else
                         {
-                            string sub_string_2 = parse.Substring(search_terms); 
+                            string sub_string_2 = parse.Substring(search_terms, search_this.Length);
                             string new_append_6 = $"    {search_this}   {sub_string_2}";
                             dictionaryString += new_append_6;
                             break;
                         }
-                         
+
                     case 6:
-                        int search_terms_2 = parse.IndexOf(search_this,0,search_to);
+                        int search_terms_2 = parse.IndexOf(search_this, 0, search_to);
                         int no_quotes = parse.IndexOf(@"""", search_terms_2, search_to - search_terms_2);
 
-                        int test_this_2 = parse.IndexOf(@")", search_terms_2, search_to-search_terms_2);
+                        int test_this_2 = parse.IndexOf(@")", search_terms_2, search_to - search_terms_2);
 
                         int search_this_length = search_this.Length;
-                        int there_should_be_a_QUOTE = parse.IndexOf(@"""", search_terms_2, search_to-search_terms_2);
+                        int there_should_be_a_QUOTE = parse.IndexOf(@"""", search_terms_2, search_to - search_terms_2);
                         int comparison_this = there_should_be_a_QUOTE - search_this_length;
 
 
-                        if (test_this_2 == -1 || no_quotes == search_terms_2+1 || comparison_this!=search_terms_2+1)
+                        if (test_this_2 == -1 || no_quotes == search_terms_2 + 1 || comparison_this != search_terms_2 + 1)
                         {
                             break;
                         }
                         else
-                        {   int length = test_this_2 - search_terms_2;
+                        {
+                            int length = test_this_2 - search_terms_2;
 
                             string sub_string_2 = parse.Substring(search_terms_2, length);
-                            
-                            
+
+
                             string new_append_6 = $"   {sub_string_2}   ";
 
                             dictionaryString += new_append_6;
@@ -328,10 +336,10 @@ string parser_function(string parse)
                         break;
                     case 7:
                         int search_terms_3 = parse.IndexOf(search_this, 0, search_to);
-                     
+
                         int first_index = parse.IndexOf(@"""", search_terms_3, search_to - search_terms_3);
                         int last_index = parse.IndexOf(@"""", first_index, search_to - first_index); // fix this
-                        string sub_string_3 = parse.Substring(first_index, last_index-first_index);
+                        string sub_string_3 = parse.Substring(first_index, last_index - first_index);
                         string final_append_3 = $" 0   {sub_string_3}";
                         dictionaryString += final_append_3;
                         break;
@@ -351,7 +359,7 @@ string parser_function(string parse)
 
     return dictionaryString;
 }
-  
+
 
 
 
@@ -390,5 +398,3 @@ static class Constants
 
 
 }
-
-
