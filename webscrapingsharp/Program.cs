@@ -34,7 +34,7 @@ void real_thread()
         Console.WriteLine(ex.ToString());
         log_number = Constants.file_start;
         File.WriteAllText("last_log.txt", log_number.ToString());
-
+        Directory.Delete(data_directory, true);
 
     }
     int return_result = real_threaded(log_number);
@@ -60,7 +60,7 @@ int real_threaded(int log_number)
     HttpClient client = new HttpClient();
 
 
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 600; i++)
     {
         new_int.Add(log_number + i);
 
@@ -72,7 +72,7 @@ int real_threaded(int log_number)
 
     }
     Task.WaitAll(thread_wrangler.ToArray());
-    return log_number + 1000;
+    return log_number + 600;
 
 
 
