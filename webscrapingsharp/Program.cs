@@ -5,23 +5,25 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-
-
-await real_main();
-
-
-async Task real_main()
+while (true)
+{
+    real_thread();
+}
+void real_thread()
 {
     int log_number;
-    string system_envrioment = Directory.GetCurrentDirectory();
-    string new_directory = $"{system_envrioment}\\temporary";
-    HttpClient client = new HttpClient();
+    string system_envrionment = Directory.GetCurrentDirectory();
+    string new_directory = $"{system_envrionment}\\temporary";
+    string data_directory = $"{system_envrionment}\\data";
 
     if (!Directory.Exists(new_directory))
     {
         Directory.CreateDirectory(new_directory);
     }
-
+    if (!Directory.Exists(data_directory))
+    {
+        Directory.CreateDirectory(data_directory);
+    }
     try
     {
         string read_file = File.ReadAllText("last_log.txt");
@@ -31,26 +33,49 @@ async Task real_main()
     {
         Console.WriteLine(ex.ToString());
         log_number = Constants.file_start;
-        await File.WriteAllTextAsync("last_log.txt", log_number.ToString());
+        File.WriteAllText("last_log.txt", log_number.ToString());
+        
 
     }
+   int return_result = real_threaded(log_number);
+   File.WriteAllText("last_log.txt", return_result.ToString());
 
-    int processor_count = Environment.ProcessorCount;
+
+
+
+
+
+    return;
+}
+
+
+int real_threaded(int log_number)
+{
+
+
+    int multiplier = 90;
+
     List<Task> thread_wrangler = new List<Task>();
+    List<int> new_int = new List<int>();
+    HttpClient client = new HttpClient();
 
-    for (int i=0; i<processor_count; i++)
+
+    for (int i=0; i<90; i++)
     {
+        new_int.Add(log_number+i);
+        
+    }
+    foreach (int i in new_int)
+    {
+        thread_wrangler.Add(Task.Run(() => web_scraper(i, client)));
 
-        Task new_task = Task.Run(() => web_scraper(log_number, client));
-        log_number++;
-        thread_wrangler.Add(new_task);
 
     }
-
     Task.WaitAll(thread_wrangler.ToArray());
+    return log_number+90;
+
 
     
-
    
 }
 async Task web_scraper(int log_number, HttpClient client)
@@ -58,50 +83,58 @@ async Task web_scraper(int log_number, HttpClient client)
         try
         {
             string interop_string = $"{Constants.website}{log_number}{Constants.website_end}";
-            Console.WriteLine(interop_string);
+           
             HttpResponseMessage response = await client.GetAsync(interop_string);
-            var msg = response.EnsureSuccessStatusCode();
-            Console.WriteLine(msg);
-            string system_envrioment = Directory.GetCurrentDirectory();
+           
+          
+            string system_environment = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             System.Net.Http.HttpContent content = response.Content;
             var contentStream = await content.ReadAsStreamAsync();
 
-            string create_file = $"{log_number}.zip";
-            var stream_read = File.Create(create_file);
+            string create_file = $"{log_number}_delete.zip";
+            var stream_read = File.Create($"{system_environment}\\{create_file}");
+     
             await contentStream.CopyToAsync(stream_read);
-            string file_path = $"{system_envrioment}\\{create_file}";
-            Console.WriteLine(file_path);
-            string extract_to = $"{system_envrioment}\\temporary";
-            Console.WriteLine(extract_to);
-            ZipFile.ExtractToDirectory(file_path, extract_to);
-            string open_text = $"{extract_to}\\log_{log_number}.log";
-            string good_rename = $"{extract_to}\\log_{log_number}.txt";
+            contentStream.Close();
+            stream_read.Close();
+            file_stream(system_environment, log_number, create_file);
 
-            File.Move(open_text,good_rename);
-            Console.WriteLine(good_rename);
-            StreamReader fs = File.OpenText(good_rename);
-            file_stream(fs, log_number);
-
-        }
-        catch (HttpRequestException e)
+    }
+        catch (Exception e)
         {
             Console.WriteLine("\nException Caught!");
             Console.WriteLine("Message :{0} ", e.Message);
-            return;
+            
         }
+
     
 }
 
-int file_stream(StreamReader read, int log_number)
+int file_stream(string system_environment, int log_number, string create_file)
 {
+    string current_directory = Directory.GetCurrentDirectory();
+    string extract_to = $"{current_directory}\\temporary\\{log_number}";
+    
+    string file_path = $"{system_environment}\\{create_file}";
+    string good_rename = $"{extract_to}\\log_{log_number}.txt";
+    if (!Directory.Exists(extract_to))
+    {
+        Directory.CreateDirectory(extract_to);
+        ZipFile.ExtractToDirectory(file_path, extract_to, true);
+        string open_text = $"{extract_to}\\log_{log_number}.log";
+        File.Move(open_text, good_rename);
+        File.Delete(open_text);
+        File.Delete(file_path);
+    }
+    
+    StreamReader fs = File.OpenText(good_rename);
     List<string> append_deez = new List<string>();
-    read.BaseStream.Seek(0, System.IO.SeekOrigin.Begin);
     int line_number = 0;
-    while (!read.EndOfStream)
+    while (!fs.EndOfStream)
     {
         try
         {
-            string parse_this = read.ReadLine();
+            string parse_this = fs.ReadLine();
             parse_this = parse_this.ToLower();
             string append = parser_function(parse_this);
             append_deez.Add(append);
@@ -110,15 +143,26 @@ int file_stream(StreamReader read, int log_number)
         }
         catch (Exception e)
         {
-            
+            fs.Close();
+            string data_path = $"{system_environment}\\data\\{log_number}_data";
             Console.WriteLine(e.Message);
-            File.WriteAllLines($"log_{log_number}.txt", append_deez);
+            if (!Directory.Exists(data_path))
+            {
+                Directory.CreateDirectory(data_path);
+            }
+            File.WriteAllLines($"{data_path}\\{log_number}.txt", append_deez);
             return 0;
             
 
         }
     }
-
+    string data_path_2 = $"{current_directory}\\data\\{log_number}_data";
+    if (!Directory.Exists(data_path_2))
+    {
+        Directory.CreateDirectory(data_path_2);
+    }
+    File.WriteAllLines($"{data_path_2}\\{log_number}.txt", append_deez);
+    fs.Close();
     return 1;
 
 }
@@ -217,7 +261,6 @@ string parser_function(string parse)
                     case 1:   
                         final_append = new_good_index+Constants.merc_values;
                         string new_append_2 = $"       {final_append}   ";
-                        Console.WriteLine(new_append_2);
                         dictionaryString += new_append_2;
                         break;
                     case 2:
@@ -243,9 +286,7 @@ string parser_function(string parse)
                         dictionaryString += new_append_5;
                         break;
                     case 5:
-                        Console.WriteLine(search_to);
                         int search_terms = parse.IndexOf(search_this,0, search_to);
-                        Console.WriteLine(search_terms);
                         int test_this = parse.IndexOf("(", search_terms, search_to - search_terms);
                         if(test_this == -1)
                         {
