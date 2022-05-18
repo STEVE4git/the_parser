@@ -116,7 +116,6 @@ int file_stream(string system_environment, int log_number, string create_file)
         ZipFile.ExtractToDirectory(file_path, extract_to, true);
         string open_text = $"{extract_to}\\log_{log_number}.log";
         File.Move(open_text, good_rename);
-        File.Delete(open_text);
         File.Delete(file_path);
     }
     else
