@@ -4,11 +4,7 @@ using System.Net;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
-while (true)
-{
-    real_thread();
-}
+real_thread();
 void real_thread()
 {
     int log_number;
@@ -37,16 +33,12 @@ void real_thread()
         
 
     }
+    while (true)
+    {
+        int return_result = real_threaded(log_number);
+        File.WriteAllText("last_log.txt", return_result.ToString());
+    }
    
-    int return_result = real_threaded(log_number);
-    File.WriteAllText("last_log.txt", return_result.ToString());
-    Directory.Delete(new_directory, true);
-
-
-
-
-
-    return;
 }
 
 
