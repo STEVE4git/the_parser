@@ -4,13 +4,16 @@ using System.Net;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-real_thread();
-void real_thread()
+using System.Diagnostics;
+real_main();
+void real_main()
 {
     int log_number;
     string system_envrionment = Directory.GetCurrentDirectory();
     string new_directory = $"{system_envrionment}\\temporary";
     string data_directory = $"{system_envrionment}\\data";
+    HttpClient client = new HttpClient();
+    client.Timeout = TimeSpan.FromSeconds(30);
 
     if (!Directory.Exists(new_directory))
     {
@@ -30,19 +33,46 @@ void real_thread()
         Console.WriteLine(ex.ToString());
         log_number = Constants.file_start;
         File.WriteAllText("last_log.txt", log_number.ToString());
-        
+
 
     }
+    int return_result = log_number;
+    int loop_int = return_result;
+    int static_int = loop_int+2000;
+    Stopwatch newwatch = Stopwatch.StartNew();
+    newwatch.Start();
     while (true)
     {
-        int return_result = real_threaded(log_number);
-        File.WriteAllText("last_log.txt", return_result.ToString());
+      return_result = real_thread(return_result, client);
+
+        loop_int+=1000;
+        if(static_int<loop_int)
+        {
+            string return_string = loop_int.ToString();
+            File.WriteAllText("last_log.txt", return_string);
+            Console.WriteLine(return_string);
+            Console.WriteLine(newwatch.ElapsedTicks);
+            newwatch.Restart();
+            static_int += 4000;
+            
+            
+        }
     }
+
+}
+int real_thread(int log_number, HttpClient client)
+{
+   
+    
+    
+    int return_result = real_threaded(log_number, client);
+    return return_result;
+    
    
 }
 
 
-int real_threaded(int log_number)
+int real_threaded(int log_number, HttpClient client)
 {
 
 
@@ -50,10 +80,10 @@ int real_threaded(int log_number)
 
     List<Task> thread_wrangler = new List<Task>();
     List<int> new_int = new List<int>();
-    HttpClient client = new HttpClient();
+    
 
 
-    for (int i = 0; i < 600; i++)
+    for (int i = 0; i < 1000; i++)
     {
         new_int.Add(log_number + i);
 
@@ -65,7 +95,7 @@ int real_threaded(int log_number)
 
     }
     Task.WaitAll(thread_wrangler.ToArray());
-    return log_number + 600;
+    return log_number + 1000;
 
 
 
@@ -78,7 +108,7 @@ async Task web_scraper(int log_number, HttpClient client)
         string interop_string = $"{Constants.website}{log_number}{Constants.website_end}";
 
         HttpResponseMessage response = await client.GetAsync(interop_string);
-
+        response.EnsureSuccessStatusCode();
 
         string system_environment = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         System.Net.Http.HttpContent content = response.Content;
@@ -95,8 +125,10 @@ async Task web_scraper(int log_number, HttpClient client)
     }
     catch (Exception e)
     {
+        
         Console.WriteLine("\nException Caught!");
         Console.WriteLine("Message :{0} ", e.Message);
+        return;
 
     }
 
@@ -381,7 +413,7 @@ string parser_function(string parse)
                         if (first_index != -1)
                         {
                             int last_index = parse.IndexOf(@"""", first_index + 1, search_to - first_index - 1);
-                            int length = last_index - first_index;
+                            int length = last_index+1 - first_index;
                             if (length > 0)
                             {
                                 string sub_string_3 = parse.Substring(first_index, length);
@@ -406,32 +438,6 @@ string parser_function(string parse)
 
     return dictionaryString;
 }
-
-
-
-
-struct team
-{
-    public bool team_id;
-    public List<int> player_id;
-    public Player player_data;
-
-
-
-
-}
-
-struct Player
-{
-    public int id;
-    public List<string> classes;
-    public List<string> actions;
-    public List<string> values;
-
-
-
-}
-
 static class Constants
 {
     public const int file_start = 1000000;
