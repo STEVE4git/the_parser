@@ -4,7 +4,7 @@ using System.Net;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Diagnostics;
+
 real_main();
 void real_main()
 {
@@ -39,21 +39,15 @@ void real_main()
     int return_result = log_number;
     int loop_int = return_result;
     int static_int = loop_int+2000;
-    Stopwatch newwatch = Stopwatch.StartNew();
-    newwatch.Start();
     while (true)
     {
       return_result = real_thread(return_result, client);
 
-        loop_int+=500;
+        loop_int+=300;
         if(static_int<loop_int)
         {
             string return_string = loop_int.ToString();
             File.WriteAllText("last_log.txt", return_string);
-            Console.WriteLine(return_string);
-            Console.WriteLine(newwatch.ElapsedMilliseconds);
-            double rate = (double)(loop_int-log_number) / (double)(newwatch.ElapsedMilliseconds);
-            Console.WriteLine(rate);
             static_int += 4000;
             
             
@@ -84,7 +78,7 @@ int real_threaded(int log_number, HttpClient client)
     
 
 
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 300; i++)
     {
         new_int.Add(log_number + i);
 
@@ -96,7 +90,7 @@ int real_threaded(int log_number, HttpClient client)
 
     }
     Task.WaitAll(thread_wrangler.ToArray());
-    return log_number + 500;
+    return log_number + 300;
 
 
 
