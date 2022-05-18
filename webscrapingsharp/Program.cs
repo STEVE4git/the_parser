@@ -34,12 +34,13 @@ void real_thread()
         Console.WriteLine(ex.ToString());
         log_number = Constants.file_start;
         File.WriteAllText("last_log.txt", log_number.ToString());
-        Directory.Delete(new_directory, true);
+        
 
     }
+   
     int return_result = real_threaded(log_number);
     File.WriteAllText("last_log.txt", return_result.ToString());
-
+    Directory.Delete(new_directory, true);
 
 
 
@@ -140,37 +141,94 @@ int file_stream(string system_environment, int log_number, string create_file)
             string parse_this = fs.ReadLine();
             parse_this = parse_this.ToLower();
             string append = parser_function(parse_this);
-            append_deez.Add(append);
+            if (append is not null)
+            {
+                append_deez.Add(append);
+            }
             line_number++;
 
         }
         catch (Exception e)
         {
-            fs.Close();
-            string data_path = $"{system_environment}\\data\\{log_number}_data";
             Console.WriteLine(e.Message);
-            if (!Directory.Exists(data_path))
-            {
-                Directory.CreateDirectory(data_path);
-            }
-            File.WriteAllLines($"{data_path}\\{log_number}.txt", append_deez);
-            return 0;
-
-
+            Console.WriteLine(e.StackTrace);
+            break;
+            
         }
     }
+    fs.Close();
     string data_path_2 = $"{current_directory}\\data\\{log_number}_data";
     if (!Directory.Exists(data_path_2))
     {
         Directory.CreateDirectory(data_path_2);
     }
     File.WriteAllLines($"{data_path_2}\\{log_number}.txt", append_deez);
-    fs.Close();
+    
     return 1;
 
 }
+Dictionary<int, int> parser_search(int new_x, string parse, ImmutableArray<string> const_teams, string interp_string)
+{
+    try
+    {
+
+        int length_of_search = parse.Length;
+
+        int new_index = parse.IndexOf(interp_string, 0, length_of_search);
+
+        int end_this = parse.IndexOf(@"""", 0, new_index);
+        if (end_this != -1)
+        {
+            int check = parse.IndexOf(@"""", end_this + 1, (length_of_search - end_this - 1));
+
+
+            if (check < new_index && check != -1)
+            {
+                end_this = parse.IndexOf(@"""", check + 1, (length_of_search - check - 1));
+                check = parse.IndexOf(@"""", end_this + 1, (length_of_search - end_this - 1));
+                
+            }
+
+            foreach (string loop_string in const_teams)
+            {
+
+                if (parse.Contains(loop_string))
+                {
+
+                    int good_index = parse.IndexOf(loop_string, end_this, length_of_search - check);
+                    if (good_index != -1)
+                    {
+                        Dictionary<int, int> people_involved = new Dictionary<int, int>();
+                        int team_index = const_teams.IndexOf(loop_string);
+                        people_involved.Add(new_x, team_index);
+
+                        return people_involved;
+
+
+                    }
+                }
+            }
+        }
+    }
+
+    catch (Exception ex)
+    {
+        Console.WriteLine("PARSING FAILED\n\n\n\n\n");
+        Console.WriteLine(ex.Message);
+        return null;
+    }
+
+
+    return null;
+
+
+ }
 string parser_function(string parse)
 {
+            if (String.IsNullOrEmpty(parse))
+            {
+                return null;
+            }
     ImmutableArray<string> const_teams = ImmutableArray.Create(new string[] { "<red>", "<blue>" });
 
 
@@ -191,51 +249,26 @@ string parser_function(string parse)
 
     int new_x = 0;
 
+
     Dictionary<int, int> people_involved = new Dictionary<int, int>();
     while (new_x < 50)
     {
-        string interp_string = $"<{new_x}>";
-        if (parse.Contains(interp_string))
-        {
-            int length_of_search = parse.Length;
+         string interp_string = $"<{new_x}>";
+         if (parse.Contains(interp_string))
+         {
+             var temp_dictionary = parser_search(new_x, parse, const_teams, interp_string);
+             if (temp_dictionary is not null)
+             {
+                
+                 people_involved.Add(temp_dictionary.ElementAt(0).Key, temp_dictionary.ElementAt(0).Value);
+             }
+         }       
+          new_x++;
 
-            int new_index = parse.IndexOf(interp_string, 0, length_of_search);
-
-            int end_this = parse.IndexOf(@"""", new_index, length_of_search - new_index);
-
-            foreach (string loop_string in const_teams)
-            {
-
-
-                int check = parse.IndexOf(@"""", new_index, length_of_search - new_index);
-
-
-                int good_check = parse.IndexOf(loop_string, new_index, length_of_search - new_index);
-
-                int new_check = check - new_index;
-
-                if (new_index < end_this && check != -1 && (check - 8) < good_check)
-                {
-                    int team_index = const_teams.IndexOf(loop_string);
-                    people_involved.Add(new_x, team_index);
-
-
-                    break;
-
-                }
-
-
-            }
-
-            new_x++;
-        }
-        else
-        {
-            new_x++;
         }
 
 
-    }
+    
 
     if (people_involved.Count > 0)
     {
@@ -249,11 +282,14 @@ string parser_function(string parse)
         foreach (string search_this in const_arrays[x])
         {
             bool test = parse.Contains(search_this); // Handling actions
+            
             int search_to = parse.Length;
             int final_append;
             if (test)
             {
+                int search_index = parse.IndexOf(search_this);
                 int new_good_index = const_arrays[x].IndexOf(search_this);
+                
                 switch (x)
                 {
                     case 0:
@@ -273,75 +309,95 @@ string parser_function(string parse)
                         break;
 
                     case 3:
-                        int search_index = parse.IndexOf(search_this, 0, search_to);
+                        
                         string sub_string = parse.Substring(search_index);
-
-                        final_append = new_good_index;
-                        string new_append_4 = $"    {search_index.ToString()}   {sub_string}";
+                        string new_append_4 = $"    0   {sub_string}    ";
                         dictionaryString += new_append_4;
 
                         break;
                     case 4:
 
                         final_append = new_good_index - 1;
-                        string who_did_it = $"{people_involved.ElementAt(1).Key}:{people_involved.ElementAt(1).Value},";
-                        string new_append_5 = $"       {final_append}           {who_did_it} ";
-                        dictionaryString += new_append_5;
+                        if (people_involved.Count > 1)
+                        {
+                            string who_did_it = $"{people_involved.ElementAt(1).Key}:{people_involved.ElementAt(1).Value},";
+                            string new_append_5 = $"       {final_append}           {who_did_it} ";
+                            dictionaryString += new_append_5;
+                        }
                         break;
                     case 5:
-                        int search_terms = parse.IndexOf(search_this, 0, search_to);
-                        int test_this = parse.IndexOf(@"""", search_terms, search_to - search_terms);
+                       
+                        int test_this = parse.IndexOf(@"""", search_index, search_to - search_index);
                         int test_this_3 = parse.IndexOf(@"""", 0, search_to);
-                        int length_2 = search_this.Length+search_terms;
+                        int parentheses = parse.LastIndexOf(@")");
+                        if(parentheses == -1 && test_this != -1)
+                        {
+                            int end_string = parse.LastIndexOf(@"""");
+                            int length = end_string - test_this_3;
+                            string sub_string_2 = parse.Substring(test_this_3-1, length+2);
+                            string new_append_6 = $"    {sub_string_2}      ";
+                            dictionaryString += new_append_6;
+                            break;
+
+                        }
+                       
+                        
 
                         
-                        if (test_this_3!=search_terms-1 || test_this!=length_2 )
+                        if (test_this_3 ==-1)
                         {
                             break;
                         }
                         else
                         {
-                            string sub_string_2 = parse.Substring(search_terms, search_this.Length);
-                            string new_append_6 = $"    {search_this}   {sub_string_2}";
+                            int length = search_to - (test_this_3 - 1);
+                            string sub_string_2 = parse.Substring(test_this_3-1,length);
+                            string new_append_6 = $"    {sub_string_2}      ";
                             dictionaryString += new_append_6;
                             break;
                         }
 
                     case 6:
-                        int search_terms_2 = parse.IndexOf(search_this, 0, search_to);
-                        int no_quotes = parse.IndexOf(@"""", search_terms_2, search_to - search_terms_2);
-
-                        int test_this_2 = parse.IndexOf(@")", search_terms_2, search_to - search_terms_2);
-
-                        int search_this_length = search_this.Length;
-                        int there_should_be_a_QUOTE = parse.IndexOf(@"""", search_terms_2, search_to - search_terms_2);
-                        int comparison_this = there_should_be_a_QUOTE - search_this_length;
-
-
-                        if (test_this_2 == -1 || no_quotes == search_terms_2 + 1 || comparison_this != search_terms_2 + 1)
+                        int one_hundred_sure = parse.IndexOf($"({search_this} ");
+                        if (one_hundred_sure != -1)
                         {
-                            break;
-                        }
-                        else
-                        {
-                            int length = test_this_2 - search_terms_2;
-
-                            string sub_string_2 = parse.Substring(search_terms_2, length);
+                            int search_to_2 = parse.IndexOf(")", one_hundred_sure, search_to - one_hundred_sure);
 
 
-                            string new_append_6 = $"   {sub_string_2}   ";
+                            if (search_to_2 == -1)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                int start_search = one_hundred_sure + 1;
+                                int end_search = search_to_2;
+                                int length_2 = end_search - start_search;
 
-                            dictionaryString += new_append_6;
+                                string sub_string_2 = parse.Substring(start_search, length_2);
+
+
+                                string new_append_6 = $"   {sub_string_2}   ";
+
+                                dictionaryString += new_append_6;
+                            }
                         }
                         break;
                     case 7:
-                        int search_terms_3 = parse.IndexOf(search_this, 0, search_to);
+                        
 
-                        int first_index = parse.IndexOf(@"""", search_terms_3, search_to - search_terms_3);
-                        int last_index = parse.IndexOf(@"""", first_index, search_to - first_index); // fix this
-                        string sub_string_3 = parse.Substring(first_index, last_index - first_index);
-                        string final_append_3 = $" 0   {sub_string_3}";
-                        dictionaryString += final_append_3;
+                        int first_index = parse.IndexOf(@"""", search_index, search_to - search_index);
+                        if (first_index != -1)
+                        {
+                            int last_index = parse.IndexOf(@"""", first_index + 1, search_to - first_index - 1);
+                            int length = last_index - first_index;
+                            if (length > 0)
+                            {
+                                string sub_string_3 = parse.Substring(first_index, length);
+                                string final_append_3 = $" {Constants.wep_values}   {sub_string_3}";
+                                dictionaryString += final_append_3;
+                            }
+                        }
                         break;
 
 
@@ -394,6 +450,7 @@ static class Constants
     public const int merc_values = 100;
     public const int action_values = 900;
     public const int item_values = 3000;
+    public const int wep_values = 5000;
 
 
 
