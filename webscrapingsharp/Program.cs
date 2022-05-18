@@ -45,7 +45,7 @@ void real_main()
     {
       return_result = real_thread(return_result, client);
 
-        loop_int+=800;
+        loop_int+=500;
         if(static_int<loop_int)
         {
             string return_string = loop_int.ToString();
@@ -84,7 +84,7 @@ int real_threaded(int log_number, HttpClient client)
     
 
 
-    for (int i = 0; i < 800; i++)
+    for (int i = 0; i < 500; i++)
     {
         new_int.Add(log_number + i);
 
@@ -96,7 +96,7 @@ int real_threaded(int log_number, HttpClient client)
 
     }
     Task.WaitAll(thread_wrangler.ToArray());
-    return log_number + 800;
+    return log_number + 500;
 
 
 
