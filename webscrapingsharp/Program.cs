@@ -45,14 +45,15 @@ void real_main()
     {
       return_result = real_thread(return_result, client);
 
-        loop_int+=1000;
+        loop_int+=800;
         if(static_int<loop_int)
         {
             string return_string = loop_int.ToString();
             File.WriteAllText("last_log.txt", return_string);
             Console.WriteLine(return_string);
-            Console.WriteLine(newwatch.ElapsedTicks);
-            newwatch.Restart();
+            Console.WriteLine(newwatch.ElapsedMilliseconds);
+            double rate = (double)(loop_int-log_number) / (double)(newwatch.ElapsedMilliseconds);
+            Console.WriteLine(rate);
             static_int += 4000;
             
             
@@ -83,7 +84,7 @@ int real_threaded(int log_number, HttpClient client)
     
 
 
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 800; i++)
     {
         new_int.Add(log_number + i);
 
@@ -95,7 +96,7 @@ int real_threaded(int log_number, HttpClient client)
 
     }
     Task.WaitAll(thread_wrangler.ToArray());
-    return log_number + 1000;
+    return log_number + 800;
 
 
 
