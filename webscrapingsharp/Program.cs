@@ -58,8 +58,6 @@ void real_main()
 int real_thread(int log_number, HttpClient client)
 {
    
-    
-    
     int return_result = real_threaded(log_number, client);
     return return_result;
     
@@ -70,25 +68,17 @@ int real_thread(int log_number, HttpClient client)
 int real_threaded(int log_number, HttpClient client)
 {
 
-
-   
-
-    List<Task> thread_wrangler = new List<Task>();
+    string system_environment = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     List<int> new_int = new List<int>();
-    
-
-
-    for (int i = 0; i < 300; i++)
-    {
+    const int max_tasks = 300;
+    for (int i = 0; i < max_tasks; i++)
         new_int.Add(log_number + i);
 
-    }
-    foreach (int i in new_int)
-    {
-        thread_wrangler.Add(Task.Run(() => web_scraper(i, client)));
+    
+    List<Task> thread_wrangler = new List<Task>();
+    for(int i=0;i<max_tasks;i++)
+        thread_wrangler.Add(Task.Run(() => web_scraper(i, client, system_environment)));
 
-
-    }
     Task.WaitAll(thread_wrangler.ToArray());
     return log_number + 300;
 
@@ -96,7 +86,7 @@ int real_threaded(int log_number, HttpClient client)
 
 
 }
-async Task web_scraper(int log_number, HttpClient client)
+async Task web_scraper(int log_number, HttpClient client, string system_environment)
 {
     try
     {
@@ -105,7 +95,7 @@ async Task web_scraper(int log_number, HttpClient client)
         HttpResponseMessage response = await client.GetAsync(interop_string);
         response.EnsureSuccessStatusCode();
 
-        string system_environment = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+       
         System.Net.Http.HttpContent content = response.Content;
         var contentStream = await content.ReadAsStreamAsync();
 
@@ -151,7 +141,6 @@ int file_stream(string system_environment, int log_number, string create_file)
     }
     StreamReader fs = File.OpenText(good_rename);
     List<string> append_deez = new List<string>();
-    int line_number = 0;
     while (!fs.EndOfStream)
     {
         try
@@ -163,7 +152,7 @@ int file_stream(string system_environment, int log_number, string create_file)
             {
                 append_deez.Add(append);
             }
-            line_number++;
+            
 
         }
         catch (Exception e)
@@ -259,7 +248,7 @@ string parser_function(string parse)
     ImmutableArray<string> read_values = ImmutableArray.Create(new string[] { "damage", "weapon", "healing", "winner", "round" });
     ImmutableArray<string> action_word = ImmutableArray.Create(new string[] { "with" });
 
-    string dictionaryString = null;
+    
 
     ImmutableArray<ImmutableArray<string>> const_arrays = ImmutableArray.Create(new ImmutableArray<string>[] { const_values, merc_values, result_of_action, team_talk, against, start_times, read_values, action_word });
 
@@ -287,7 +276,7 @@ string parser_function(string parse)
 
 
     
-
+    string dictionaryString = null;
     if (people_involved.Count > 0)
     {
         string new_string = $"{people_involved.ElementAt(0).Key}:{people_involved.ElementAt(0).Value},";
@@ -300,13 +289,13 @@ string parser_function(string parse)
         foreach (string search_this in const_arrays[x])
         {
             bool test = parse.Contains(search_this); // Handling actions
-            
-            int search_to = parse.Length;
-            int final_append;
+   
             if (test)
             {
                 int search_index = parse.IndexOf(search_this);
                 int new_good_index = const_arrays[x].IndexOf(search_this);
+                int search_to = parse.Length;
+                int final_append;
                 
                 switch (x)
                 {
@@ -359,9 +348,6 @@ string parser_function(string parse)
 
                         }
                        
-                        
-
-                        
                         if (test_this_3 ==-1)
                         {
                             break;
