@@ -295,6 +295,8 @@ string parser_function(string parse)
     }
 
     int length_of_arr = const_arrays.Length;
+    if (1 < people_involved.Count)
+        return null;
     for (int x = 0; x < length_of_arr; x++)
     {
         foreach (string search_this in const_arrays[x])
@@ -353,7 +355,7 @@ string parser_function(string parse)
                             int end_string = parse.LastIndexOf(@"""");
                             int length = end_string - test_this_3;
                             string sub_string_2 = parse.Substring(test_this_3-1, length+2);
-                            string new_append_6 = $"    {sub_string_2}      ";
+                            string new_append_6 = $"     {sub_string_2}  ";
                             dictionaryString += new_append_6;
                             break;
 
@@ -395,7 +397,7 @@ string parser_function(string parse)
                                 string sub_string_2 = parse.Substring(start_search, length_2);
 
 
-                                string new_append_6 = $"   {sub_string_2}   ";
+                                string new_append_6 = $"    {sub_string_2}    ";
 
                                 dictionaryString += new_append_6;
                             }
@@ -412,7 +414,11 @@ string parser_function(string parse)
                             if (length > 0)
                             {
                                 string sub_string_3 = parse.Substring(first_index, length);
-                                string final_append_3 = $" {Constants.wep_values}   {sub_string_3}";
+                                if (people_involved.Count > 1)
+                                {
+                                    string who_died = $"{people_involved.ElementAt(1).Key}:{people_involved.ElementAt(1).Value}";
+                                }
+                                string final_append_3 = $"  {who_died}   {Constants.wep_values}    {sub_string_3}";
                                 dictionaryString += final_append_3;
                             }
                         }
@@ -430,8 +436,9 @@ string parser_function(string parse)
         }
     }
 
-
-    return dictionaryString;
+    
+    
+  return dictionaryString;
 }
 static class Constants
 {
