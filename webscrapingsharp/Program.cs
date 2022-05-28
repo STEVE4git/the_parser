@@ -456,7 +456,4 @@ static class Constants
     public const int action_values = 900;
     public const int item_values = 3000;
     public const int wep_values = 5000;
-
-
-
 }
