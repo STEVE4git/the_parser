@@ -417,9 +417,15 @@ string parser_function(string parse)
                                 if (people_involved.Count > 1)
                                 {
                                     string who_died = $"{people_involved.ElementAt(1).Key}:{people_involved.ElementAt(1).Value}";
+                                    string final_append_3 = $"  {who_died}   {Constants.wep_values}    {sub_string_3}";
+                                    dictionaryString += final_append_3;
                                 }
-                                string final_append_3 = $"  {who_died}   {Constants.wep_values}    {sub_string_3}";
-                                dictionaryString += final_append_3;
+                                else
+                                {
+                                    string final_append_3 = $"  {Constants.wep_values}    {sub_string_3}";
+                                    dictionaryString += final_append_3;
+                                }
+                                
                             }
                         }
                         break;
